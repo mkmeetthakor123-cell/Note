@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notebook Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(to bottom, 
+                #f5f5f5 0%, 
+                #f5f5f5 49.9%, 
+                #e0e0e0 50%, 
+                #e0e0e0 50.1%, 
+                #f5f5f5 100%);
+            background-size: 100% 4px;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+            min-height: 60vh;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                transparent 49.9%, 
+                #e8e8e8 50%, 
+                #e8e8e8 50.1%, 
+                transparent 100%);
+            background-size: 100% 20px;
+        }
+
+        #noteInput {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.6;
+            background: transparent;
+            resize: none;
+            padding: 0;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: #ecf0f1;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button.danger {
+            background: #e74c3c;
+        }
+
+        button.danger:hover {
+            background: #c0392b;
+        }
+
+        .saved {
+            text-align: center;
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .saved.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Notebook</h1>
+            <p>Write your notes. Save anytime.</p>
+        </div>
+        
+        <div class="content">
+            <textarea id="noteInput" placeholder="Start writing your notes here... 
+            
+Line 1...
+Line 2...
+Line 3..."></textarea>
+        </div>
+        
+        <div class="controls">
+            <button onclick="saveNote()">💾 Save Note</button>
+            <button onclick="clearNote()" class="danger">🗑️ Clear All</button>
+            <button onclick="exportNote()">📤 Export TXT</button>
+        </div>
+        
+        <div class="saved" id="savedMsg">Saved successfully!</div>
+    </div>
+
+    <script>
+        const noteInput = document.getElementById('noteInput');
+        const savedMsg = document.getElementById('savedMsg');
+
+        // Load saved note on page load
+        window.onload = function() {
+            const saved = localStorage.getItem('notebookNote');
+            if (saved) {
+                noteInput.value = saved;
+            }
+        };
+
+        function saveNote() {
+            localStorage.setItem('notebookNote', noteInput.value);
+            savedMsg.classList.add('show');
+            setTimeout(() => savedMsg.classList.remove('show'), 2000);
+        }
+
+        function clearNote() {
+            if (confirm('Clear all notes? This cannot be undone.')) {
+                noteInput.value = '';
+                localStorage.removeItem('notebookNote');
+            }
+        }
+
+        function exportNote() {
+            const text = noteInput.value || 'No notes to export.';
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'notebook-notes.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(saveNote, 30000);
+        
+        // Save on Ctrl+S
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveNote();
+            }
+        });
+    </script>
+</body>
+</html>
